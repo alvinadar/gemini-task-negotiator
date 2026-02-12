@@ -3,10 +3,9 @@ from google import genai # Use the new SDK specifically
 import json
 import os 
 
-# --- SECURITY FIX: Load key from Streamlit Secrets ---
-# detailed instructions on setting this up are in Phase 3
+
 try:
-    GOOGLE_API_KEY = st.secrets["AIzaSyAftXtE0G4-hkENF4ks97g0Zu7y9563Kl4"]
+    GOOGLE_API_KEY = GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"]
 except FileNotFoundError:
     # Fallback for local testing if you have an .env file or just want to paste it temporarily (don't commit this!)
     GOOGLE_API_KEY = "YOUR_API_KEY_HERE_ONLY_FOR_LOCAL_TESTING" 
@@ -55,4 +54,3 @@ def get_recommendation(tasks, time, energy):
    response = client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
    return response.text
 
-# ... (Rest of your UI code remains the same) ...
