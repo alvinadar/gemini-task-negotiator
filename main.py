@@ -33,7 +33,7 @@ def parse_brain_dump(text_input):
 
     try:
         # UPDATED: Use the 'client' variable we created above
-        response = client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
+        response = client.models.generate_content(model="gemma-3-1b-it", contents=prompt)
         # Note: I changed the model to 'gemini-2.0-flash' or 'gemini-1.5-flash' 
         # because 'gemma-3-1b-it' might not be available via the API yet depending on your region/access.
         
@@ -51,6 +51,53 @@ def get_recommendation(tasks, time, energy):
    Goal: Pick the SINGLE best task.
    """
    # UPDATED: Use the 'client' variable
-   response = client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
+   response = client.models.generate_content(model="gemma-3-1b-it", contents=prompt)
    return response.text
 
+
+# Create the streamlite app
+st.set_page_config(page_title="Task Negotiatior",page_icon="🧠") 
+
+st.title("🧠 Germini Task Negotiator")
+st.caption("Power by Google Germini gemma-3-1b-it")
+
+# Initialize session state to keep data alive between button clicks
+
+if 'tasks' not in st.session_state:
+    st.session_state.tasks = []
+
+#SECTION 1 : BRAIN DUMP 
+with st.expander("Step 1 :Brain Dump (Click to Open)", expanded = not st.session_state.tasks):
+    st.write("Type everything on your mind.Dont worry about formatting.")
+    dump = st.text_area("Ex: 'Need to email boss, buy milk, fix the door handle...'")
+    if st.button("Analyze Task"):
+        if dump:
+            with st.spinner("Germini is organizing your life...."):
+                st.session_state.task = parse_brain_dump(dump)
+        else:
+            st.warning("Please type something first!")
+if st.session_state.tasks:
+    st.devider()
+    st.subheader("Your Sturctured List")
+    #Display the JSON data as a clean table 
+    st.table(st.session_state.task)
+
+    st.devider()
+
+# SECTION 3: THE NEGOTIATION
+st.subheader("Step 2 : What should I do NOW ?")
+col1,col2 = st.columns(2)
+with col1:
+    time_avail = st.slider("Time Available (Minutes)",5,120,30)
+with col2:
+    energy_level = st.select_slider("Current Energy",
+ options=["Zombie 🧟", "Low 🔋", "Neutral 😐", "High ⚡", "God Mode 🚀"], value="Neutral 😐")
+if st.button("✨ Pick My Task"):
+    with st.spinner("Negotiating with your brain....."):
+        recommendation = get_recommendation(st.session_state.task,time_avail,energy_level)
+        st.success("###Recomendation")
+        st.markdown(recommendation)
+
+if st.button("Clear & Start Over"):
+    st.session_state.task = []
+    st.rerun()
